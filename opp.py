@@ -37,10 +37,10 @@ def parse_user_intent(user_prompt, api_key):
     try:
         response = model.generate_content(f"{sys_prompt}\n\n用户输入: {user_prompt}")
         clean_text = response.text.strip().lstrip('```json').rstrip('```')
-        return json.loads(clean_text).get("destinations",)
+        return json.loads(clean_text).get("destinations", list())
     except Exception as e:
         st.error(f"意图解析失败: {e}")
-        return
+        return list()
 
 def get_route_matrix(origins, destinations, api_key):
     """调用 Google Routes API 获取距离与时间"""
@@ -63,7 +63,7 @@ def get_route_matrix(origins, destinations, api_key):
 
 def plan_safe_itinerary(destinations_list, gmaps_api_key):
     """生成结合了8小时疲劳熔断与保养检查的行程"""
-    daily_itinerary =
+    daily_itinerary = list()
     current_day = 1
     
     daily_drive_time_hours = 0.0
@@ -72,7 +72,7 @@ def plan_safe_itinerary(destinations_list, gmaps_api_key):
     next_large_maintenance = LARGE_MAINTENANCE_INTERVAL_KM
     
     current_location = destinations_list
-    day_plan = {"day": current_day, "start": current_location, "stops":, "events":}
+    day_plan = {"day": current_day, "start": current_location, "stops": list(), "events": list()}
     
     # 进度条
     progress_bar = st.progress(0)
@@ -82,7 +82,7 @@ def plan_safe_itinerary(destinations_list, gmaps_api_key):
         # API 调用或使用模拟容错数据
         matrix_data = get_route_matrix([current_location], [next_location], gmaps_api_key)
         
-        if matrix_data and len(matrix_data) > 0 and 'distanceMeters' in matrix_data:
+        if matrix_data and isinstance(matrix_data, list) and len(matrix_data) > 0 and 'distanceMeters' in matrix_data:
             distance_km = int(matrix_data.get('distanceMeters', 0)) / 1000.0
             duration_str = matrix_data.get('duration', '0s')
             duration_hours = int(duration_str.replace('s', '')) / 3600.0
@@ -99,7 +99,7 @@ def plan_safe_itinerary(destinations_list, gmaps_api_key):
             # 开启新的一天
             current_day += 1
             daily_drive_time_hours = 0.0
-            day_plan = {"day": current_day, "start": current_location, "stops":, "events":}
+            day_plan = {"day": current_day, "start": current_location, "stops": list(), "events": list()}
         
         daily_drive_time_hours += duration_hours
         total_cumulative_km += distance_km
