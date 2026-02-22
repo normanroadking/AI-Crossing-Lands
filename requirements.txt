@@ -1,6 +1,7 @@
-streamlit==1.32.0
-google-generativeai==0.4.1
-requests==2.31.0
-pandas==2.2.1
-pydeck==0.8.1b0
-polyline==2.0.1
+streamlit
+google-genai
+pydantic
+requests
+ortools
+pandas
+pydeck
